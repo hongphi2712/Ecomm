@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("AUTH_DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  SELLER
+  ADMIN
+  SUPPORT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  LOCKED
+  SUSPENDED
+}
+
+enum OtpPurpose {
+  LOGIN_2FA
+  PASSWORD_RESET
+}
+
+enum LoginResult {
+  SUCCESS
+  FAILED
+  OTP_REQUIRED
+  LOCKED
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  passwordHash         String
+  fullName             String
+  phone                String?
+  role                 UserRole       @default(CUSTOMER)
+  status               UserStatus     @default(ACTIVE)
+  isEmailVerified      Boolean        @default(false)
+  isTwoFactorEnabled   Boolean        @default(false)
+  failedLoginAttempts  Int            @default(0)
+  lockedUntil          DateTime?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  refreshTokens        RefreshToken[]
+  otpCodes             OtpCode[]
+  loginHistory         LoginHistory[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id                String         @id @default(uuid())
+  userId            String
+  tokenHash         String         @unique
+  expiresAt         DateTime
+  revokedAt         DateTime?
+  createdAt         DateTime       @default(now())
+  replacedByTokenId String?
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  replacedByToken   RefreshToken?  @relation("RefreshTokenRotation", fields: [replacedByTokenId], references: [id])
+  replacedTokens    RefreshToken[] @relation("RefreshTokenRotation")
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model OtpCode {
+  id        String     @id @default(uuid())
+  userId    String
+  codeHash  String
+  purpose   OtpPurpose
+  expiresAt DateTime
+  consumedAt DateTime?
+  createdAt DateTime   @default(now())
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("otp_codes")
+}
+
+model LoginHistory {
+  id            String      @id @default(uuid())
+  userId        String?
+  email         String
+  result        LoginResult
+  ipAddress     String?
+  userAgent     String?
+  correlationId String?
+  createdAt     DateTime    @default(now())
+  user          User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([email])
+  @@map("login_history")
+}

@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fincommerce-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fincommerce}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-fincommerce_password}
+      POSTGRES_DB: ${POSTGRES_DB:-fincommerce}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-fincommerce}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth-service/Dockerfile
+    container_name: fincommerce-auth-service
+    env_file:
+      - .env
+    environment:
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT:-3001}
+      AUTH_DATABASE_URL: ${AUTH_DATABASE_URL:-postgresql://fincommerce:fincommerce_password@postgres:5432/fincommerce_auth?schema=public}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

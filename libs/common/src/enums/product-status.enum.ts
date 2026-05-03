@@ -1,0 +1,8 @@
+export enum ProductStatus {
+  DRAFT = 'DRAFT',
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  ACTIVE = 'ACTIVE',
+  REJECTED = 'REJECTED',
+  BANNED = 'BANNED',
+  OUT_OF_STOCK = 'OUT_OF_STOCK'
+}
