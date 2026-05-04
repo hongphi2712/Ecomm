@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, Matches, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'customer@example.com' })
@@ -15,8 +15,8 @@ export class RegisterDto {
   @IsString()
   fullName!: string;
 
-  @ApiPropertyOptional({ example: '+84901234567' })
+  @ApiPropertyOptional({ example: '+84337415627' })
   @IsOptional()
-  @IsPhoneNumber()
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'phone must be a valid phone number' })
   phone?: string;
 }

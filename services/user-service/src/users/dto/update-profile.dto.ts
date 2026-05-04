@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsOptional, IsPhoneNumber, IsString, IsUrl } from 'class-validator';
+import { IsDateString, IsOptional, IsString, IsUrl, Matches } from 'class-validator';
 
 export class UpdateProfileDto {
   @ApiPropertyOptional({ example: 'Nguyen Van A' })
@@ -7,9 +7,9 @@ export class UpdateProfileDto {
   @IsString()
   fullName?: string;
 
-  @ApiPropertyOptional({ example: '+84901234567' })
+  @ApiPropertyOptional({ example: '+84337415627' })
   @IsOptional()
-  @IsPhoneNumber()
+  @Matches(/^\+?[0-9]{7,15}$/, { message: 'phone must be a valid phone number' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'https://cdn.example.com/avatar.png' })
