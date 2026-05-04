@@ -68,7 +68,11 @@ jobs:
               exit 1
             fi
 
-            docker compose up -d --build postgres auth-service user-service
+            docker compose up -d postgres
+            docker compose build auth-service
+            docker compose up -d auth-service
+            docker compose build user-service
+            docker compose up -d user-service
             docker compose ps
 
             for attempt in $(seq 1 20); do

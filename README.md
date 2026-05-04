@@ -4,14 +4,13 @@ Enterprise e-commerce and payment simulation platform built with a microservice 
 
 ## Current Status
 
-Phase 0 initialized:
+Phase 4 completed:
 
-- Repository structure
-- Documentation folder
-- Microservice folders
-- Infrastructure folders
-- npm workspace root
-- Environment files
+- Shared common library
+- Auth Service with register, login, refresh token, logout, OTP, RBAC guard support, login history, account lock, Swagger, and Docker deploy
+- User Service with current profile APIs, profile update, address CRUD, Swagger, and Docker deploy
+- PostgreSQL Docker Compose deployment
+- GitHub Actions deploy flow to EC2/VPS
 
 ## Planned Stack
 
@@ -31,11 +30,14 @@ Phase 0 initialized:
 fincommerce/
 ├── docs/
 ├── services/
+│   ├── auth-service/
+│   └── user-service/
 ├── libs/
 ├── gateway/
 ├── infrastructure/
 ├── .env
 ├── .env.example
+├── docker-compose.yml
 ├── package.json
 └── README.md
 ```
@@ -43,3 +45,25 @@ fincommerce/
 ## Development
 
 Implementation must follow `docs/ai_implementation_steps.md` phase by phase.
+
+```bash
+npm run build
+npm test
+docker compose up -d --build postgres auth-service user-service
+```
+
+## Service URLs
+
+Local:
+
+```text
+Auth Service: http://localhost:3001
+User Service: http://localhost:3002
+```
+
+EC2 currently used for testing:
+
+```text
+Auth Service: http://ec2-13-212-242-156.ap-southeast-1.compute.amazonaws.com:3001
+User Service: http://ec2-13-212-242-156.ap-southeast-1.compute.amazonaws.com:3002
+```
