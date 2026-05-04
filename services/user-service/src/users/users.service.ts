@@ -1,5 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { ErrorCodes } from '@fincommerce/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ClientKafka } from '@nestjs/microservices';
+import { ErrorCodes, EventTypes, KAFKA_TOPICS } from '@fincommerce/common';
 import { UserAddress, UserProfile } from '../../generated/prisma';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAddressDto } from './dto/create-address.dto';
@@ -8,7 +9,10 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka
+  ) {}
 
   async getMe(userId: string, email: string) {
     const profile = await this.ensureProfile(userId, email);
@@ -26,6 +30,16 @@ export class UsersService {
         phone: dto.phone,
         avatarUrl: dto.avatarUrl,
         dateOfBirth: dto.dateOfBirth ? new Date(dto.dateOfBirth) : undefined
+      }
+    });
+
+    // Bắn sự kiện đồng bộ dữ liệu sang Auth Service
+    this.kafkaClient.emit(KAFKA_TOPICS.userEvents, {
+      type: EventTypes.ProfileUpdated,
+      data: {
+        userId: profile.userId,
+        fullName: profile.fullName,
+        phone: profile.phone
       }
     });
 

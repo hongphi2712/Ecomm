@@ -223,6 +223,16 @@ export class AuthService {
     return this.toUserResponse(user);
   }
 
+  async syncProfile(userId: string, data: { fullName?: string; phone?: string }) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        fullName: data.fullName,
+        phone: data.phone
+      }
+    });
+  }
+
   private async issueTokenPair(user: User) {
     const [accessToken, refreshToken] = await Promise.all([
       this.authTokenService.createAccessToken(user),

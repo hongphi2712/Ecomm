@@ -2,7 +2,9 @@ import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { Transport } from '@nestjs/microservices';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import {
   CorrelationIdMiddleware,
   HttpExceptionFilter,
@@ -14,6 +16,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  app.use(helmet());
   app.enableCors();
 
   app.use(new CorrelationIdMiddleware().use);
@@ -35,6 +38,20 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
+
+  app.connectMicroservice({
+    transport: Transport.KAFKA,
+    options: {
+      client: {
+        brokers: [process.env.KAFKA_BROKERS || 'kafka:9092'],
+      },
+      consumer: {
+        groupId: 'auth-service-consumer',
+      },
+    },
+  });
+
+  await app.startAllMicroservices();
 
   const port = configService.get<number>('AUTH_SERVICE_PORT', 3001);
   await app.listen(port);

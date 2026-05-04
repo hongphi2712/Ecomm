@@ -34,7 +34,8 @@ export const EventTypes = {
   FraudDetected: 'FraudDetected',
   OrderOnHold: 'OrderOnHold',
   UserLoggedIn: 'UserLoggedIn',
-  AdminAction: 'AdminAction'
+  AdminAction: 'AdminAction',
+  ProfileUpdated: 'ProfileUpdated'
 } as const;
 
 export type EventType = (typeof EventTypes)[keyof typeof EventTypes];

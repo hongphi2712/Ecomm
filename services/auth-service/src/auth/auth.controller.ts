@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CurrentUser, RequestWithContext } from '@fincommerce/common';
+import { CurrentUser, EventTypes, KAFKA_TOPICS, RequestWithContext } from '@fincommerce/common';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { LoginDto } from './dto/login.dto';
@@ -56,5 +57,13 @@ export class AuthController {
   @ApiBearerAuth()
   me(@CurrentUser('id') userId: string) {
     return this.authService.getMe(userId);
+  }
+
+  @EventPattern(KAFKA_TOPICS.userEvents)
+  async handleUserEvents(@Payload() message: any) {
+    if (message.type === EventTypes.ProfileUpdated) {
+      const { userId, fullName, phone } = message.data;
+      await this.authService.syncProfile(userId, { fullName, phone });
+    }
   }
 }

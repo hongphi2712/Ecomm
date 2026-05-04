@@ -15,7 +15,8 @@ export const KAFKA_TOPICS = {
   shippingEvents: 'shipping.events',
   notificationEvents: 'notification.events',
   auditEvents: 'audit.events',
-  fraudEvents: 'fraud.events'
+  fraudEvents: 'fraud.events',
+  userEvents: 'user.events'
 } as const;
 
 export const KAFKA_DLQ_TOPICS = {
