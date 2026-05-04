@@ -17,7 +17,10 @@ describe('UsersService Security (IDOR & Auth)', () => {
         delete: jest.fn()
       }
     };
-    service = new UsersService(prisma);
+    const kafkaClient = {
+      emit: jest.fn()
+    };
+    service = new UsersService(prisma, kafkaClient as any);
   });
 
   describe('IDOR Prevention', () => {

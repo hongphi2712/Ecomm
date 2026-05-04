@@ -48,8 +48,11 @@ describe('UsersService', () => {
         delete: jest.fn()
       }
     };
+    const kafkaClient = {
+      emit: jest.fn()
+    };
 
-    service = new UsersService(prisma);
+    service = new UsersService(prisma, kafkaClient as any);
   });
 
   it('creates a profile lazily for the current user', async () => {
