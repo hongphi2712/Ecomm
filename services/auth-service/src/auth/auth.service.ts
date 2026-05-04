@@ -237,11 +237,8 @@ export class AuthService {
   }
 
   private async handleFailedLogin(user: User, request?: RequestWithContext) {
-    const maxAttempts = this.configService.get<number>(
-      'ACCOUNT_LOCK_MAX_FAILED_ATTEMPTS',
-      5
-    );
-    const lockMinutes = this.configService.get<number>('ACCOUNT_LOCK_MINUTES', 15);
+    const maxAttempts = this.getNumberConfig('ACCOUNT_LOCK_MAX_FAILED_ATTEMPTS', 5);
+    const lockMinutes = this.getNumberConfig('ACCOUNT_LOCK_MINUTES', 15);
     const failedLoginAttempts = user.failedLoginAttempts + 1;
     const shouldLock = failedLoginAttempts >= maxAttempts;
 
@@ -261,10 +258,7 @@ export class AuthService {
   private async createOtp(userId: string, purpose: OtpPurpose) {
     const code = this.generateOtpCode();
     const codeHash = await this.hashSecret(code);
-    const expiresInMinutes = this.configService.get<number>(
-      'OTP_EXPIRES_IN_MINUTES',
-      5
-    );
+    const expiresInMinutes = this.getNumberConfig('OTP_EXPIRES_IN_MINUTES', 5);
 
     await this.prisma.otpCode.create({
       data: {
@@ -318,8 +312,15 @@ export class AuthService {
   }
 
   private async hashSecret(secret: string): Promise<string> {
-    const saltRounds = this.configService.get<number>('BCRYPT_SALT_ROUNDS', 12);
+    const saltRounds = this.getNumberConfig('BCRYPT_SALT_ROUNDS', 12);
     return bcrypt.hash(secret, saltRounds);
+  }
+
+  private getNumberConfig(key: string, defaultValue: number): number {
+    const value = this.configService.get<string | number>(key, defaultValue);
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : defaultValue;
   }
 
   private generateOtpCode(): string {
