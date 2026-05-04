@@ -5,6 +5,7 @@ COPY package.json package-lock.json ./
 COPY libs/common/package.json libs/common/package.json
 COPY services/auth-service/package.json services/auth-service/package.json
 COPY services/user-service/package.json services/user-service/package.json
+COPY services/seller-service/package.json services/seller-service/package.json
 RUN npm ci
 
 FROM deps AS build
@@ -26,6 +27,7 @@ COPY package.json package-lock.json ./
 COPY libs/common/package.json libs/common/package.json
 COPY services/auth-service/package.json services/auth-service/package.json
 COPY services/user-service/package.json services/user-service/package.json
+COPY services/seller-service/package.json services/seller-service/package.json
 RUN npm ci --omit=dev
 
 COPY --from=build /app/libs/common/dist libs/common/dist

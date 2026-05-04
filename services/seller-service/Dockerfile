@@ -13,11 +13,11 @@ WORKDIR /app
 
 COPY tsconfig.base.json ./
 COPY libs/common libs/common
-COPY services/auth-service services/auth-service
+COPY services/seller-service services/seller-service
 
-RUN npm run prisma:generate -w auth-service
+RUN npm run prisma:generate -w @fincommerce/seller-service
 RUN npm run build -w @fincommerce/common
-RUN npm run build -w auth-service
+RUN npm run build -w @fincommerce/seller-service
 
 FROM node:22-alpine AS runtime
 WORKDIR /app
@@ -30,12 +30,11 @@ COPY services/user-service/package.json services/user-service/package.json
 COPY services/seller-service/package.json services/seller-service/package.json
 RUN npm ci --omit=dev
 
-COPY --from=build /app/node_modules/.prisma node_modules/.prisma
-COPY --from=build /app/node_modules/@prisma node_modules/@prisma
 COPY --from=build /app/libs/common/dist libs/common/dist
-COPY --from=build /app/services/auth-service/dist services/auth-service/dist
-COPY --from=build /app/services/auth-service/prisma services/auth-service/prisma
+COPY --from=build /app/services/seller-service/dist services/seller-service/dist
+COPY --from=build /app/services/seller-service/generated services/seller-service/generated
+COPY --from=build /app/services/seller-service/prisma services/seller-service/prisma
 
-EXPOSE 3001
+EXPOSE 3003
 
-CMD ["sh", "-c", "npm run prisma:push -w auth-service && npm run start -w auth-service"]
+CMD ["sh", "-c", "npm run prisma:push -w @fincommerce/seller-service && npm run start -w @fincommerce/seller-service"]

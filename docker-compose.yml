@@ -52,5 +52,23 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  seller-service:
+    build:
+      context: .
+      dockerfile: services/seller-service/Dockerfile
+    container_name: fincommerce-seller-service
+    env_file:
+      - .env
+    environment:
+      SELLER_SERVICE_PORT: ${SELLER_SERVICE_PORT:-3003}
+      SELLER_DATABASE_URL: ${SELLER_DATABASE_URL:-postgresql://${POSTGRES_USER:-fincommerce}:${POSTGRES_PASSWORD:-fincommerce_password}@postgres:5432/fincommerce_seller?schema=public}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    ports:
+      - "3003:3003"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:

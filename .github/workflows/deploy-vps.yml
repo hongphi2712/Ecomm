@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Generate Prisma client
-        run: npm run prisma:generate -w auth-service
+        run: npm run prisma:generate
 
       - name: Build
         run: npm run build
@@ -69,14 +69,17 @@ jobs:
             fi
 
             docker compose up -d postgres
+            docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d postgres -tc "SELECT 1 FROM pg_database WHERE datname = '\''fincommerce_seller'\''" | grep -q 1 || psql -U "$POSTGRES_USER" -d postgres -c "CREATE DATABASE fincommerce_seller"'
             docker compose build auth-service
             docker compose up -d auth-service
             docker compose build user-service
             docker compose up -d user-service
+            docker compose build seller-service
+            docker compose up -d seller-service
             docker compose ps
 
             for attempt in $(seq 1 20); do
-              if curl -fsS http://localhost:3001/health && curl -fsS http://localhost:3002/health; then
+              if curl -fsS http://localhost:3001/health && curl -fsS http://localhost:3002/health && curl -fsS http://localhost:3003/health; then
                 exit 0
               fi
 
@@ -86,4 +89,5 @@ jobs:
 
             docker compose logs --tail 100 auth-service
             docker compose logs --tail 100 user-service
+            docker compose logs --tail 100 seller-service
             exit 1
