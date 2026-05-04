@@ -34,5 +34,23 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: fincommerce-user-service
+    env_file:
+      - .env
+    environment:
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT:-3002}
+      USER_DATABASE_URL: ${USER_DATABASE_URL:-postgresql://fincommerce:fincommerce_password@postgres:5432/fincommerce?schema=public}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+    ports:
+      - "3002:3002"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   postgres_data:

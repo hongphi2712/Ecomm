@@ -9,8 +9,8 @@
     "libs/*"
   ],
   "scripts": {
-    "build": "npm run build -w @fincommerce/common && npm run build -w auth-service",
-    "test": "npm run test --workspaces --if-present",
+    "build": "npm run prisma:generate -w auth-service && npm run prisma:generate -w user-service && npm run build -w @fincommerce/common && npm run build -w auth-service && npm run build -w user-service",
+    "test": "npm run prisma:generate -w auth-service && npm run prisma:generate -w user-service && npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {

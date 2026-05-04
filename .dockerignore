@@ -1,6 +1,8 @@
 node_modules
 dist
 coverage
+services/*/generated
+services/*/src/generated
 .git
 .github
 .env

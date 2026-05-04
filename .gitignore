@@ -15,6 +15,10 @@ pnpm-debug.log*
 
 *.tsbuildinfo
 
+# Generated Prisma clients
+services/*/generated/
+services/*/src/generated/
+
 # Private deployment keys
 *.pem
 
