@@ -70,4 +70,15 @@ jobs:
 
             docker compose up -d --build postgres auth-service
             docker compose ps
-            curl -fsS http://localhost:3001/health
+
+            for attempt in $(seq 1 20); do
+              if curl -fsS http://localhost:3001/health; then
+                exit 0
+              fi
+
+              echo "Auth Service health check failed, retrying ($attempt/20)..."
+              sleep 3
+            done
+
+            docker compose logs --tail 100 auth-service
+            exit 1
